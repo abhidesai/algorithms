@@ -1,4 +1,4 @@
-package dsa;
+package lipi.dsa;
 
 import java.util.Iterator;
 
@@ -80,6 +80,7 @@ public class List<T> implements Iterable<T> {
 		}
 	}
 
+	/*Head and tail are null nodes*/
 	private Node<T> head = new Node<T>(null);
 	private Node<T> tail = new Node<T>(null);
 	private int size = 0;
@@ -97,7 +98,9 @@ public class List<T> implements Iterable<T> {
 		Node<T> elem = new Node<T>(obj);
 
 		tail.prev().next(elem);
+		elem.prev(tail.prev());
 		tail.prev(elem);
+		elem.next(tail);
 
 		++size;
 	}
@@ -112,11 +115,26 @@ public class List<T> implements Iterable<T> {
 			for(int i = 0; i < index; ++i) {
 				idxElem = idxElem.next();
 			}
-			elem.prev(idxElem.prev());
-			elem.prev.next(elem);
-			elem.next(idxElem);
-			idxElem.prev(elem);
 		}
+
+		elem.prev(idxElem.prev());
+		elem.next(idxElem);
+		elem.prev.next(elem);
+		idxElem.prev(elem);
+		++size;
+	}
+	
+	private T deleteElement(Node<T> elem) {
+		elem.prev().next(elem.next());
+		elem.next().prev(elem.prev());
+		
+		elem.next(null);
+		elem.prev(null);
+		
+		T obj = elem.get();
+		/*remove the reference to the object*/
+		elem.set(null);
+		return obj;
 	}
 	
 	public T remove(int index) {
@@ -128,13 +146,53 @@ public class List<T> implements Iterable<T> {
 		for(int i = 0; i < index; ++i) { 
 			elem = elem.next();
 		}
-		elem.prev().next(elem.next());
-		elem.next().prev(elem.prev());
-		
-		elem.next(null);
-		elem.prev(null);
 		--size;
+		return deleteElement(elem);
+	}
+	
+	public T removeFirst() {
+		if(size <= 0) {
+			throw new IndexOutOfBoundsException();
+		}
 
+		Node<T> elem = head.next();
+		--size;
+		return deleteElement(elem);
+	}
+	
+	public T removeLast() {
+		if(size <= 0) {
+			throw new IndexOutOfBoundsException();
+		}
+
+		Node<T> elem = tail.prev();
+		--size;
+		return deleteElement(elem);
+	}
+
+	public int size() {
+		return size;
+	}
+	
+	public T get(int index) {
+		if(index < 0 || index >= this.size) {
+			throw new IndexOutOfBoundsException();
+		}
+	
+		Node<T> elem = head.next();
+		for(int i = 0; i < index; ++i) { 
+			elem = elem.next();
+		}
+		
 		return elem.get();
+	}
+
+	public void clear() {
+		while(size > 0) {
+			/* remove the first element of the list */ 
+			Node<T> elem = head.next();
+			deleteElement(elem);
+			--size;
+		}
 	}
 }
